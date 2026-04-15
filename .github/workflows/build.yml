@@ -1,0 +1,44 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller requests openpyxl pandas numpy
+
+      - name: Build EXE
+        run: |
+          pyinstaller `
+            --onefile `
+            --console `
+            --name "foreign_flow_VN30" `
+            --hidden-import=openpyxl `
+            --hidden-import=openpyxl.styles `
+            --hidden-import=openpyxl.utils `
+            --hidden-import=pandas `
+            --hidden-import=numpy `
+            --hidden-import=requests `
+            foreign_flow_collector.py
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: foreign_flow_VN30
+          path: dist/foreign_flow_VN30.exe
+          retention-days: 30
